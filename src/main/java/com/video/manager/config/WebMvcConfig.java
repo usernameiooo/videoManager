@@ -20,8 +20,4 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/**").addResourceLocations("classpath:/templates/");
         super.addResourceHandlers(registry);
     }
-
-    public static void main(String[] args) {
-        System.out.println("\\".replaceAll("\\\\","/"));
-    }
 }
