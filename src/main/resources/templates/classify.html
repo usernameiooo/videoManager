@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div th:if="${classifies!=null && classifies.size()!=0}">
+        <span  th:each="classify:${classifies}" >
+            <span th:text="${classify.name}"></span>:
+            <span th:each="value:${classify.classifyValues}" th:text="${value}"></span>
+            <form action="/addClassifyValue" method="post">
+                <input type="hidden" name="name" th:value="${classify.name}"/>
+                <input type="text" name="value"/>
+                <button type="submit">添加分类值</button>
+            </form>
+        </span>
+    </div>
+    <form action="/addClassify" method="post">
+        <input type="text" name="name"/>
+        <button type="submit">添加分类</button>
+    </form>
+</body>
+</html>

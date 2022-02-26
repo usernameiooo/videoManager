@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="Persono" />
+  <meta name="author" content="Frenify" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>视频管理器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+  <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap" rel="stylesheet" />
+  <link type="text/css" rel="stylesheet" href="css/base.css" />
+  <link type="text/css" rel="stylesheet" href="css/swiper.css" />
+  <link type="text/css" rel="stylesheet" href="css/style.css" />
+  <script type="text/javascript" src="js/jquery.min.js" ></script>
+  <style type="text/css">
+   *{
+    font-family: Jost,Arial,Helvetica,sans-serif;
+   }
+   .selected{
+    background-color: red;
+   }
+   /**左侧视频列表**/
+   .videoList{
+     overflow: scroll;
+     height: 60vh;
+   }
+   #videoList{
+    position: relative;
+    margin-top: 20px;
+   }
+   .videoList div{
+    margin: 0px;
+   }
+   .button_play{
+    display: inline-block;
+    width: 100%;
+    padding: 5px 1px;
+    margin: 0px 0px 5px;
+    background-color: #fceda8;
+    color: #000;
+    font-size: medium;
+    text-decoration: none;
+    text-align: left;
+    line-height: 1;
+    border: 1px solid;
+    border-color: #2f71a3 #265a82 #1e4766 #265a82;
+    border-radius: 8px;
+   }
+   .button_add{
+    display: inline-block;
+    height: 26px;
+    margin: 2px;
+    background-color: white;
+    color: #000;
+    font-size: medium;
+    text-decoration: none;
+    text-align: center;
+    line-height: 1;
+    border: 1px solid black;
+    border-radius: 13px;
+   }
+   .classifyValue{
+    display: inline-block;
+    min-width: 26px;
+    height: 26px;
+    margin: 2px;
+    padding: 1px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 2px;
+   }
+   .classifyValue span{
+    color: #000;
+    font-size: medium;
+    text-decoration: none;
+    text-align: center;
+    line-height: 1;
+    padding: 5px 2px;
+   }
+   .selected{
+    background-color: #ffb50a;
+    border-radius: 2px;
+   }
+   .classify{
+    border-bottom: 1px dotted grey;
+   }
+   .classifyName{
+    margin: 2px;
+    color: black;
+   }
+   .classifySet{
+    border: 1px solid grey;
+    border-radius: 0px;
+    overflow: scroll;
+   }
+   button{
+
+   }
+   button:hover{
+    border: 1px solid deepskyblue;
+   }
+   .persono_fn_sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 20;
+    background-color: #f6efef;
+    padding: 0px 10px;
+    transition: transform .5s ease;
+   }
+   .videoListPager div{
+    display: inline-block;
+    width: 30%;
+    margin: 2px;
+   }
+   .videoListPager div span,a{
+    display: inline-block;
+    width: 100%;
+    border: 1px solid grey;
+    font-size: large;
+    text-decoration: none;
+    text-align: center;
+    color: black;
+   }
+   .btn_search{
+    display: inline-block;
+    width: 60%;
+    min-width: 26px;
+    height: 26px;
+    padding: 1px;
+    background-color: #67b168;
+    border: 1px solid black;
+    border-radius: 2px;
+    text-align: center;
+    margin: 1px 20%;
+   }
+   .searchTitle{
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    margin: 2px 0;
+    border-bottom: 1px dotted black;
+   }
+  </style>
+  <script src="js/storage.js"></script>
+  <script type="text/javascript">
+   //分类标签的点击事件
+   function onTagClick(tag) {
+    var videoPath=document.getElementById("video").getAttribute("realPath");
+    var classify=tag.parentElement.getAttribute("classifyName");
+    var value=tag.innerText;
+    if(tag.className.indexOf('selected')!==-1){
+     console.log(videoPath+' remove '+classify+'='+value);
+       tag.className='classifyValue';
+       unClassifyVideo(videoPath,classify,value);
+    }else {
+       console.log(videoPath+'add'+classify+'='+value);
+       tag.className='classifyValue selected';
+       classifyVideo(videoPath,classify,value);
+    }
+   }
+   //视频添加分类值
+   function classifyVideo(videoPath,classify,value){
+    var json={"videoPath":videoPath,"classify":classify,"value":value};
+    $.ajax({
+     url: '/classifyVideo',
+     type: 'post',
+     dataType:'json',
+     contentType:'application/json;charset=UTF-8',
+     data:JSON.stringify(json),
+     success: function (data) {
+     }
+    });
+   }
+   //去除视频添加分类值
+   function unClassifyVideo(videoPath,classify,value){
+    var json={"videoPath":videoPath,"classify":classify,"value":value};
+    $.ajax({
+     url: '/unClassifyVideo',
+     type: 'post',
+     dataType:'json',
+     contentType:'application/json;charset=UTF-8',
+     data:JSON.stringify(json),
+     success: function (data) {
+     }
+    });
+   }
+   function onAddClassifyValueBtnClick(btn){
+    var videoPath=document.getElementById("video").getAttribute("realPath");
+    var name=btn.getAttribute("classifyName");
+    var value = prompt("输入增加到分类'"+name+"'的值");
+    if(name==null||value==null)return;
+    console.log("add "+value+" to classify: "+name);
+    addClassifyValue(btn,name,value,videoPath);
+    $("<button class='classifyValue selected' onclick='onTagClick(this)' >" +
+            "         <span >"+value+"</span>" +
+            "      </button>").insertBefore(btn);
+   }
+   //添加分类值
+   function addClassifyValue(btn,name,value,currVideo){
+    var json={"name":name,"value":value,"currVideo":currVideo};
+    $.ajax({
+     url: '/addClassifyValue',
+     type: 'post',
+     dataType:'json',
+     contentType:'application/json;charset=UTF-8',
+     data:JSON.stringify(json),
+     success: function (data) {
+     }
+    });
+   }
+   function onAddClassifyBtnClick(btn){
+    var name = prompt("输入分类名称");
+    if(name==null)return;
+    console.log("add classify:"+name);
+    addClassify(name);
+    $("<div  class='classify' classifyName='"+name+"'>" +
+            "    <span class='classifyName' >"+name+"</span>:" +
+            "            <button class='button_add' onclick='onAddClassifyValueBtnClick(this)' classifyName='"+name+"'>add</button>" +
+            "  </div>").insertBefore(btn);
+   }
+   //添加分类
+   function addClassify(name){
+    var json={"name":name};
+    $.ajax({
+     url: '/addClassify',
+     type: 'post',
+     dataType:'json',
+     contentType:'application/json;charset=UTF-8',
+     data:JSON.stringify(json),
+     success: function (data) {
+     }
+    });
+   }
+   function storageVisiting(video){
+        putString("visiting",video.id);
+   }
+   function clearVisiting(){
+        clearStorage("visiting");
+   }
+   /**在视频列表里滑动到正在观看的视频*/
+   function resumeVisiting(){
+    var visiting = getString("visiting");
+    if(visiting==null)return;
+    if($('#'+visiting).position()===undefined)return;
+    console.log("visiting video: "+visiting);
+    $("#videoList").animate({scrollTop: $('#'+visiting).position().top},200);
+   }
+   onload= function (){
+    resumeVisiting();
+    generateForSearchForm();
+   }
+   resumeVisiting();
+   function onSearchTagClick(tag) {
+    var classify=tag.parentElement.getAttribute("classifyName");
+    var value=tag.innerText;
+    if(tag.className.indexOf('selected')!==-1){
+     tag.className='classifyValue';
+    }else {
+     tag.className='classifyValue selected';
+    }
+    generateForSearchForm();
+   }
+   /**生成查询的表单条件*/
+   function generateForSearchForm(){
+        var classifies = document.getElementById('searchConditionSelector').getElementsByClassName("classify");
+        var condition='';
+        for(var i=0;i<classifies.length;i++){
+         var classify=classifies.item(i);
+         var classifyName=classify.getAttribute("classifyName");
+         var selecteds=classify.getElementsByClassName("selected");
+         if((selecteds!=null)&&selecteds.length>0){
+         condition+='{'+classifyName;
+         for(var j=0;j<selecteds.length;j++){
+          var selected=selecteds.item(j);
+           var value = selected.getElementsByTagName("span").item(0).innerText;
+           condition +=' '+value;
+         }
+         condition+='}'
+         }
+        }
+       document.getElementById('searchCondition').setAttribute('value',condition);
+   }
+  </script>
+ </head>
+ <body>
+  <div class="persono_fn_wrapper">
+   <!--侧栏-->
+   <div class="persono_fn_sidebar" data-max="500" data-min="250">
+    <!--打开/关闭侧栏按钮-->
+    <span class="nav__button"><span class="nav_trigger" data-open="Open" data-close="Close">Close</span><span class="width_indicator"></span></span>
+    <!--侧栏内容-->
+    <div class="sidebar_in">
+     <div >
+      <p th:text="${path}"></p>
+     </div>
+     <div >
+      <p th:text="${searchCondition==null?'all videos':searchCondition}"></p>
+     </div>
+     <div class="videoList" id="videoList">
+     <div th:each="video,itor:${videos}" th:id="${'video'+itor.index}" onclick="storageVisiting(this)">
+    <form action="/index" method="post">
+        <input type="hidden" name="realPath" th:value="${video.realPath}">
+     <button type="submit" class="button_play"  >
+      <span th:text="${'▶ '+video.name}"></span></button>
+    </form>
+      </div>
+     </div>
+      <!--视频列表翻页-->
+     <div class="videoListPager">
+         <div>
+         <a onclick="clearVisiting()" th:if="${page>0}" th:href="'/index?page='+(${page}-1)">上一页</a>
+         </div><div><span th:text="${page+1}+'/'+${maxPage}"></span>
+      </div><div>
+      <a onclick="clearVisiting()" th:if="${page+1<maxPage}" th:href="'/index?page='+(${page}+1)">下一页</a>
+     </div>
+     </div>
+     <div class="copyright">
+      <p>Copyright &copy; 2021.Company name All rights reserved.</p>
+     </div>
+    </div>
+   </div>
+   <!--页面内容-->
+   <div class="persono_fn_content">
+    <div class="persono_fn_page">
+     <section id="videoArea">
+      <div class="container">
+       <div id="video" th:if="${video!=null} " th:realPath="${video.getRealPath()}">
+        <p th:text="${video.name}"></p>
+        <div style="width: 100%;">
+         <video id="videoPalyer" width="100%" controls>
+          <source th:src="${video.getVirtualPath()}" type="video/mp4"/>
+          您的浏览器不支持 HTML5 video 标签。
+         </video>
+        </div>
+       </div>
+       <div class="classifySet" th:if="${video!=null}">
+        <div class="classify"  th:if="${classifies!=null && classifies.size()!=0}"
+              th:each="classify:${classifies}"
+              th:classifyName="${classify.name}"
+        >
+            <span class="classifyName" th:text="${classify.name}"></span>:
+            <button  onclick="onTagClick(this)" th:each="value:${classify.classifyValues}"
+                    th:class="${'classifyValue '+(video.hasClassifyValue(classify.name,value)?'selected':'')}"
+            >
+                <span  th:text="${value}"></span>
+            </button>
+            <button class="button_add" onclick="onAddClassifyValueBtnClick(this)" th:classifyName="${classify.name}">add</button>
+        </div>
+        <button class="button_add" onclick="onAddClassifyBtnClick(this)">add</button>
+       </div>
+      </div>
+     </section>
+     <section id="searchArea">
+      <div class="container">
+       <div class="classifySet" id="searchConditionSelector">
+        <span class="searchTitle" >搜索</span>
+        <div class="classify"  th:if="${classifies!=null && classifies.size()!=0}"
+             th:each="classify:${classifies}"
+             th:classifyName="${classify.name}"
+        >
+         <span class="classifyName" th:text="${classify.name}"></span>:
+         <button   onclick="onSearchTagClick(this)" th:each="value:${classify.classifyValues}"
+                  th:class="${'classifyValue '+(video!=null&&video.hasClassifyValue(classify.name,value)?'selected':'')}"
+         ><span  th:text="${value}"></span>
+         </button>
+        </div>
+         <form action="/index" method="post">
+           <input id="searchCondition" name="searchCondition" type="hidden"/>
+           <button class="btn_search" type="submit">查询</button>
+         </form>
+       </div>
+      </div>
+     </section>
+    </div>
+   </div>
+  </div>
+
+  <script src="js/jquery.js"></script>
+  <script src="js/plugins.js"></script>
+  <script src="js/init.js"></script>
+ </body>
+</html>

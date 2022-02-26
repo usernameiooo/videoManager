@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>视频列表</title>
+</head>
+<body>
+<p th:text="${path}"></p>
+<span th:each="video:${videos}">
+<a  th:href="${video.virtualPath}" th:text="${video.name}"></a>
+    <form action="/video" method="post">
+        <input type="hidden" name="realPath" th:value="${video.realPath}">
+        <button type="submit">打开</button>
+    </form>
+  <br/>
+      </span>
+</body>
+</html>

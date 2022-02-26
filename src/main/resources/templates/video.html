@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css" id="theme-styles">
+    <script type="text/javascript" src="js/jquery.min.js" ></script>
+   <style type="text/css">
+       .selected{
+           background-color: red;
+       }
+   </style>
+    <script type="text/javascript">
+        //分类标签的点击事件
+        function onTagClick(tag) {
+            var videoPath=document.getElementById("video").getAttribute("realPath");
+            var classify=tag.parentElement.getAttribute("classifyName");
+            var value=tag.innerText;
+            console.log(videoPath,classify,value);
+            tag.className='selected';
+            classifyVideo(videoPath,classify,value);
+        }
+        //视频添加分类值
+        function classifyVideo(videoPath,classify,value){
+            var json={"videoPath":videoPath,"classify":classify,"value":value};
+            $.ajax({
+                url: '/classifyVideo',
+                type: 'post',
+                dataType:'json',
+                contentType:'application/json;charset=UTF-8',
+                data:JSON.stringify(json),
+                success: function (data) {
+                }
+            });
+        }
+        function onAddClassifyValueBtnClick(btn){
+            var videoPath=document.getElementById("video").getAttribute("realPath");
+            var name=btn.getAttribute("classifyName");
+            var value = prompt("输入增加到分类'"+name+"'的值");
+            console.log("add "+value+" to classify: "+name);
+            addClassifyValue(btn,name,value,videoPath);
+           $("<button class='classifyValue' onclick='onTagClick(this)' >" +
+               "         <span class='selected' >"+value+"</span>" +
+               "      </button>").insertBefore(btn);
+        }
+        //添加分类值
+        function addClassifyValue(btn,name,value,currVideo){
+            var json={"name":name,"value":value,"currVideo":currVideo};
+            $.ajax({
+                url: '/addClassifyValue',
+                type: 'post',
+                dataType:'json',
+                contentType:'application/json;charset=UTF-8',
+                data:JSON.stringify(json),
+                success: function (data) {
+                }
+            });
+        }
+        function onAddClassifyBtnClick(btn){
+            var name = prompt("输入分类名称");
+            console.log("add classify:"+name);
+            addClassify(name);
+            $("<span  class='classify' classifyName='"+name+"'>" +
+                "    <span class='classifyName' >"+name+"</span>:" +
+                "            <button onclick='onAddClassifyValueBtnClick(this)' classifyName='"+name+"'>添加分类值</button>" +
+                "  <br/></span>").insertBefore(btn);
+        }
+        //添加分类
+        function addClassify(name){
+            var json={"name":name};
+            $.ajax({
+                url: '/addClassify',
+                type: 'post',
+                dataType:'json',
+                contentType:'application/json;charset=UTF-8',
+                data:JSON.stringify(json),
+                success: function (data) {
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+  <div id="video" th:if="${video!=null} " th:realPath="${video.getRealPath()}">
+   <p th:text="${video.name}"></p>
+   <div style="text-align:center">
+       <video id="video1" width="420" controls>
+           <source th:src="${video.getVirtualPath()}" type="video/mp4"/>
+           您的浏览器不支持 HTML5 video 标签。
+       </video>
+   </div>
+  </div>
+  <div id="classifySet">
+        <span class="classify"  th:if="${classifies!=null && classifies.size()!=0}"
+               th:each="classify:${classifies}"
+              th:classifyName="${classify.name}"
+         >
+            <span class="classifyName" th:text="${classify.name}"></span>:
+            <button class="classifyValue" onclick="onTagClick(this)" th:each="value:${classify.classifyValues}">
+                <span th:class="${video.hasClassifyValue(classify.name,value)?'selected':''}" th:text="${value}"></span>
+            </button>
+            <button class="btn" onclick="onAddClassifyValueBtnClick(this)" th:classifyName="${classify.name}">添加分类值</button>
+        <br/>
+        </span>
+        <button class="btn" onclick="onAddClassifyBtnClick(this)">添加分类</button>
+  </div>
+</body>
+</html>
